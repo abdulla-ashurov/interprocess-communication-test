@@ -9,10 +9,15 @@
 #include "process.hpp"
 #include "file_mapping.hpp"
  
+/* 
+ * This program illustrates how to create inherited FileMapping object
+ * and inherite it to child process using CMD.
+ */
+
 int main(int argc, char *argv[]) {
 	if (argc < 2) {
 		std::cout << "Please, provide correct list of arguments" << std::endl;
-		std::cout << "CLI example: arg_count child_app_name" << std::endl;
+		std::cout << "CLI example: arg_count child_proces_app_name" << std::endl;
 		return 1;
 	}
 
@@ -27,9 +32,8 @@ int main(int argc, char *argv[]) {
 		
 		Process process(cmd);
 		process.join();
-	}
-	catch (...) { // Wait specific error
-		std::cout << "Error in FileMapping class\n";
+	} catch (FileMappingException e) {
+		std::cout << "Error: " << e.msg();
 	}
 	
 	return 0;
