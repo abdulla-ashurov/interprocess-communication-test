@@ -1,0 +1,69 @@
+#ifndef __DETAILS_HPP__
+#define __DETAILS_HPP__
+
+#include "Windows.h"
+
+namespace details {
+	SECURITY_ATTRIBUTES security_attr(const bool inherit_handle) {
+		return SECURITY_ATTRIBUTES{
+			sizeof(SECURITY_ATTRIBUTES),	// nLength
+			NULL,							// lpSecurityDescriptor
+			inherit_handle					// bInheritHandle
+		};
+	}
+
+	HANDLE create_file_mapping(const size_t size) {
+		return CreateFileMapping(
+			INVALID_HANDLE_VALUE,	// hFile
+			NULL,					// lpFileMappingAttributes
+			PAGE_READWRITE,			// flProtect
+			0,						// dwMaximumSizeHigh
+			size,					// dwMaximumSizeLow
+			NULL					// lpName
+		);
+	}
+
+	HANDLE create_inherited_file_mapping(const size_t size) {
+		return CreateFileMapping(
+			INVALID_HANDLE_VALUE,		// hFile
+			create_security_attr(true),	// lpFileMappingAttributes
+			PAGE_READWRITE,				// flProtect
+			0,							// dwMaximumSizeHigh
+			size,						// dwMaximumSizeHigh
+			NULL						// lpName
+		);
+	}
+
+	void* map_view_of_file(HANDLE f_map, const size_t size) {
+		return MapViewOfFile(
+			f_map,					// hFileMappingObject
+			FILE_MAP_ALL_ACCESS,	// dwDesiredAccess
+			0,						// dwFileOffsetHigh
+			0,						// dwFileOffsetLow
+			size					// dwNumberOfBytesToMap
+		);
+	}
+
+	int format_message(const int err_code, char *errMsg) {
+		return FormatMessage(
+			FORMAT_MESSAGE_ALLOCATE_BUFFER |
+			FORMAT_MESSAGE_FROM_SYSTEM |
+			FORMAT_MESSAGE_IGNORE_INSERTS,				// dwFlags
+			NULL,										// lpSource
+			err_code,									// dwMessageId
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),	// dwLanguageId
+			&errMsg,									// lpBuffer
+			0,											// nSize
+			NULL										// arguments
+		);
+	}
+
+	// Free the buffer allocated by format_message
+	void local_free(char *buffer) {
+		if (buffer != NULL) {
+			LocalFree(buffer);
+		}
+	}
+}
+
+#endif // __DETAILS_HPP__

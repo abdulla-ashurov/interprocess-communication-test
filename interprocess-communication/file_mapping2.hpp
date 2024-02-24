@@ -4,40 +4,54 @@
 #include <Windows.h>
 
 #include "common.hpp"
+#include "exceptions.hpp"
 
-template <size_t m_size>
-class BaseFileMapping {
+template<size_t m_size>
+class FileMapping {
 private:
-	std::wstring m_name;
+	HANDLE m_hFileMap;	// UniqueHandle m_hFileMap;
+	void* m_buffer;		// MapViewBuffer m_buffer;
 
 public:
-	BaseFileMapping(SECURITY_ATTRIBUTES& sa, const std::wstring& name) : m_name(name) {
-		CreateFileMapping(INVALID_HANDLE_VALUE, &sa, PAGE_READWRITE, 0, m_size, m_name.length() ? m_name.c_str() : NULL);
+	FileMapping() : m_hFileMap(NULL), m_buffer(NULL) {
+		m_hFileMap = create_file_mapping(m_size);
+		if (m_hFileMap == NULL) {
+			throw FileMappingExceptions(GetLastError());
+		}
+
+		m_buffer = map_view_of_file(m_hFileMap, m_size);
+		if (m_buffer == NULL) {
+			CloseHandle(m_hFileMap);
+			throw FileMappingExceptions(GetLastError());
+		}
 	}
-	virtual ~BaseFileMapping() = 0;
+
+	/*
+	* FileMapping() {
+	*     m_hFileMap = create_file_mapping(m_size);
+	*     m_buffer = map_view_of_file(m_hFileMap, m_size);
+	* }
+	*/
+
+	~FileMapping() {
+		if (m_buffer) {
+			UnmapViewOfFile(m_buffer);
+		}
+		if (m_hFileMap) {
+			CloseHandle(m_hFileMap);
+		}
+	}
 
 public:
-	BaseFileMapping(const BaseFileMapping& other);
-	BaseFileMapping& operator=(const BaseFileMapping& other);
+	FileMapping(const FileMapping& other);
+	FileMapping& operator=(const FileMapping& other);
 
 public:
 	size_t size() const;
-	const std::wstring& name() const;
 	HANDLE handle();
 	void* begin();
 	void* end();
 };
-
-class FileMapping : public BaseFileMapping<size_t> {
-public:
-	explicit FileMapping(const std::wstring& name = L"");
-	~FileMapping();
-};
-
-class InheritedFileMapping : public BaseFileMapping<size_t> {
-public:
-	explicit InheritedFileMapping(const std::wstring& name = L"");
-	~InheritedFileMapping();
-};
+class InheritedFileMapping : public BaseFileMapping<size_t>;
 
 #endif // __FILE_MAPPING_HPP__
