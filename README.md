@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 
 	try {
 		std::string msg("Hello World!");
-		InheritedFileMapping<msg.length()> f_map;
+		UniqueInheritedFileMapping<msg.length()> f_map;
 
 		strcpy(static_cast<char *>(f_map.begin()), msg.c_str());
 		
