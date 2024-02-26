@@ -44,6 +44,39 @@ namespace details {
 		);
 	}
 
+	bool create_process(const std::wstring &cmd, PROCESS_INFORMATION &pi) {
+		STARTUPINFO si;
+		return CreateProcess(
+			NULL,								// lpApplicationName
+			const_cast<LPWSTR>(cmd.c_str()),	// lpCommandLine
+			NULL,								// lpProcessAttributes
+			NULL,								// lpThreadAttributes
+			false,								// bInheritHandles
+			NULL,								// dwCreationFlags
+			NULL,								// lpEnvironment
+			NULL,								// lpCurrentDirectory
+			&si,								// lpStartupInfo
+			&pi									// lpProcessInformation
+		);
+	}
+
+	bool create_inherited_process(PROCESS_INFORMATION &pi) {
+		STARTUPINFO si = { sizeof(si) };
+		SECURITY_ATTRIBUTES sa = create_security_attr(true);
+		return CreateProcess(
+			NULL,								// lpApplicationName
+			const_cast<LPWSTR>(cmd.c_str()),	// lpCommandLine
+			&sa,								// lpProcessAttributes
+			&sa,								// lpThreadAttributes
+			true,								// bInheritHandles
+			NULL,								// dwCreationFlags
+			NULL,								// lpEnvironment
+			NULL,								// lpCurrentDirectory
+			&si,								// lpStartupInfo
+			&pi									// lpProcessInformation
+		);
+	}
+
 	int format_message(const int err_code, char *errMsg) {
 		return FormatMessage(
 			FORMAT_MESSAGE_ALLOCATE_BUFFER |

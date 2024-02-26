@@ -34,6 +34,18 @@ void* map_view_of_file(HANDLE f_map, const size_t size) {
 	return buffer;
 }
 
+void create_process(const std::wstring &cmd, PROCESS_INFORMATION &pi) {
+	if (!details::create_process(cmd, pi)) {
+		// Add exception
+	}
+}
+
+void create_inherited_process(const std::wstring& cmd, PROCESS_INFORMATION& pi) {
+	if (!details::create_inherited_process(cmd, pi)) {
+		// Add exception
+	}
+}
+
 std::string error_message(const size_t err_code) {
 	std::string err_msg;
 	char* out_err_msg(NULL);
