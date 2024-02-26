@@ -60,8 +60,20 @@ namespace details {
 
 	// Free the buffer allocated by format_message
 	void local_free(char *buffer) {
-		if (buffer != NULL) {
+		if (buffer) {
 			LocalFree(buffer);
+		}
+	}
+
+	void checked_close_handle(HANDLE h) {
+		if (h) {
+			CloseHandle(h);
+		}
+	}
+
+	void checked_unmap_view_of_file(void *buffer) {
+		if (buffer) {
+			UnmapViewOfFile(m_buffer);
 		}
 	}
 }

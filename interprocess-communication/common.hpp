@@ -16,8 +16,6 @@ HANDLE create_file_mapping(const size_t size) {
 	return hFileMap;
 }
 
-
-
 HANDLE create_inherited_file_mapping(const size_t size) {
 	HANDLE hFileMap = details::create_inherited_file_mapping(size);
 	if (hFileMap == NULL) {

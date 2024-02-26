@@ -3,6 +3,8 @@
 
 #include "Windows.h"
 
+#include "details.hpp"
+
 class UniqueMapViewBuffer {
 private:
 	void* m_buffer;
@@ -12,9 +14,7 @@ public:
 	UniqueMapViewBuffer(void* buffer) : m_buffer(buffer) {}
 	
 	~UniqueMapViewBuffer() {
-		if (m_buffer) {
-			UnmapViewOfFile(m_buffer);
-		}
+		details::checked_unmap_view_of_file(m_buffer);
 	}
 
 public:
@@ -22,9 +22,7 @@ public:
 	UniqueMapViewBuffer& operator=(const MapViewBufffer& other) = delete;
 	UniqueMapViewBuffer& operator=(void* buffer) {
 		if (m_buffer != buffer) {
-			if (m_buffer) {
-				UnmapViewOfFile(m_buffer);
-			}
+			details::checked_unmap_view_of_file(m_buffer);
 			m_buffer = buffer;
 		}
 

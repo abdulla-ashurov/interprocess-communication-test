@@ -3,55 +3,32 @@
 
 #include <Windows.h>
 
+#include "handle.hpp"
+#include "buffer.hpp"
 #include "common.hpp"
 #include "exceptions.hpp"
 
 template<size_t m_size>
 class FileMapping {
 private:
-	HANDLE m_hFileMap;	// UniqueHandle m_hFileMap;
-	void* m_buffer;		// MapViewBuffer m_buffer;
+	UniqueHandle m_hFileMap;
+	UniqueMapViewBuffer m_buffer;
 
 public:
-	FileMapping() : m_hFileMap(NULL), m_buffer(NULL) {
+	FileMapping() {
 		m_hFileMap = create_file_mapping(m_size);
-		if (m_hFileMap == NULL) {
-			throw FileMappingExceptions(GetLastError());
-		}
-
-		m_buffer = map_view_of_file(m_hFileMap, m_size);
-		if (m_buffer == NULL) {
-			CloseHandle(m_hFileMap);
-			throw FileMappingExceptions(GetLastError());
-		}
-	}
-
-	/*
-	* FileMapping() {
-	*     m_hFileMap = create_file_mapping(m_size);
-	*     m_buffer = map_view_of_file(m_hFileMap, m_size);
-	* }
-	*/
-
-	~FileMapping() {
-		if (m_buffer) {
-			UnmapViewOfFile(m_buffer);
-		}
-		if (m_hFileMap) {
-			CloseHandle(m_hFileMap);
-		}
+		m_buffer = map_view_of_file(m_hFileMap.get(), m_size);
 	}
 
 public:
-	FileMapping(const FileMapping& other);
-	FileMapping& operator=(const FileMapping& other);
+	FileMapping(const FileMapping& other) = delete;
+	FileMapping& operator=(const FileMapping& other) = delete;
 
 public:
-	size_t size() const;
-	HANDLE handle();
-	void* begin();
-	void* end();
+	size_t size() const { return m_size; }
+	HANDLE handle() { return m_hFileMap.get(); }
+	void* begin() { return m_buffer.begin(); }
+	void* end() { return static_cast<uint8_t*>(m_buffer.begin()) + m_size; }
 };
-class InheritedFileMapping : public BaseFileMapping<size_t>;
 
 #endif // __FILE_MAPPING_HPP__
