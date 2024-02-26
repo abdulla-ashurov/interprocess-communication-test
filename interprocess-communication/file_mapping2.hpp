@@ -9,20 +9,20 @@
 #include "exceptions.hpp"
 
 template<size_t m_size>
-class FileMapping {
+class UniqueFileMapping {
 private:
 	UniqueHandle m_hFileMap;
 	UniqueMapViewBuffer m_buffer;
 
 public:
-	FileMapping() {
+	UniqueFileMapping() {
 		m_hFileMap = create_file_mapping(m_size);
 		m_buffer = map_view_of_file(m_hFileMap.get(), m_size);
 	}
 
 public:
-	FileMapping(const FileMapping& other) = delete;
-	FileMapping& operator=(const FileMapping& other) = delete;
+	UniqueFileMapping(const UniqueFileMapping& other) = delete;
+	UniqueFileMapping& operator=(const UniqueFileMapping& other) = delete;
 
 public:
 	size_t size() const { return m_size; }
