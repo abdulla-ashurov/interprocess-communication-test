@@ -1,25 +1,36 @@
-#include "file_mapping.hpp"
-#include "process.hpp"
+#include <string>
 #include <sstream>
-#include <tchar.h>
 
-int main() {
+#include "process.hpp"
+#include "file_mapping.hpp"
+
+/*
+ * This program illustrates how to create inherited FileMapping object
+ * and inherite it to child process using CMD.
+ */
+
+int main(int argc, char* argv[]) {
+	if (argc < 2) {
+		std::cout << "Please, provide correct list of arguments" << std::endl;
+		std::cout << "CLI example: arg_count child_proces_app_name" << std::endl;
+		return 1;
+	}
+
 	try {
-		wchar_t msg[] = L"Hello World!";
-		FileMapping f_map(255, FILE_MODES::WRITE, L"hFileMap", true);
+		std::string msg("Hello World!");
+		UniqueInheritedFileMapping<msg.length()> f_map;
 
-		CopyMemory(f_map.begin(), msg, (_tcslen(msg) * sizeof(TCHAR)));
+		strcpy(static_cast<char*>(f_map.begin()), msg.c_str());
 
-		std::wcout << "Message: " << (const wchar_t*)(f_map.begin()) << std::endl;
+		std::stringstream cmd;
+		cmd << argv[1] << (UINT_PTR)(f_map.handle());
 
-		const std::wstring app_name(L"C:\\Users\\ashur\\source\\repos\\interprocess-communication\\x64\\Release\\interprocess-communication.exe ");
-		std::wstringstream cmd;
-		cmd << app_name << (UINT_PTR)(f_map.handle());
-
-		Process process(cmd.str(), true);
-
+		Process process(cmd);
+		process.join();
 	}
-	catch (...) {
-		std::cout << "Error in FileMapping class\n";
+	catch (FileMappingExceptions e) {
+		std::cout << "Error: " << e.msg();
 	}
+
+	return 0;
 }
