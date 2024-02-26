@@ -1,91 +1,50 @@
-#ifndef __FILE_MAPPING_HPP__
+#ifndef __FILE_MAPPING_HPP_
 #define __FILE_MAPPING_HPP__
 
-#include <iostream>
-#include <string>
-#include "Windows.h"
+#include <Windows.h>
+
+#include "handle.hpp"
+#include "buffer.hpp"
 #include "common.hpp"
+#include "exceptions.hpp"
 
-enum FILE_MODES {
-	READ = PAGE_READONLY,
-	WRITE = PAGE_READWRITE
-};
-
-class FileMapping {
-private:
-	size_t m_size;
-	std::wstring m_name;
-	HANDLE m_hFileMap;
-	void* m_buffer;
-
-	void free_members() {
-		if (m_buffer) {
-			UnmapViewOfFile(m_buffer);
-		}
-
-		if (m_hFileMap) {
-			CloseHandle(m_hFileMap);
-		}
-	}
-
-	void map_view_of_file(const size_t size, const FILE_MODES& mode) {
-		bool mapViewMode;
-		if (mode == FILE_MODES::WRITE) {
-			mapViewMode = FILE_MAP_ALL_ACCESS;
-		}
-		else {
-			mapViewMode = FILE_MAP_READ;
-		}
-
-		m_buffer = MapViewOfFile(m_hFileMap, mapViewMode, 0, 0, size);
-		if (m_buffer == NULL) {
-			free_members();
-			throw(std::runtime_error("Cannot map view of file!"));
-		}
-	}
+template<size_t m_size>
+class BaseFileMapping {
+protected:
+	UniqueHandle m_hFileMap;
+	UniqueMapViewBuffer m_buffer;
 
 public:
-	FileMapping(const size_t size, const FILE_MODES& mode, const std::wstring& name = L"", const bool inheritHandle = false)
-		: m_size(size), m_name(name), m_hFileMap(NULL), m_buffer(NULL) {
-		SECURITY_ATTRIBUTES sa = create_security_attr(inheritHandle);
-		m_hFileMap = CreateFileMapping(INVALID_HANDLE_VALUE, &sa, mode, 0, m_size, m_name.length() ? m_name.c_str() : NULL);
-		if (m_hFileMap == NULL) {
-			throw(std::runtime_error("Cannot create file mapping object!"));
-		}
+	BaseFileMapping() {}
+	virtual ~BaseFileMapping() = 0;
 
-		map_view_of_file(m_size, mode);
-	}
-
-	FileMapping(const size_t size, HANDLE hFileMap, const FILE_MODES& mode)
-		: m_size(size), m_hFileMap(hFileMap), m_buffer(NULL) {
-		map_view_of_file(size, mode);
-	}
-
-	FileMapping(const FileMapping& other) = delete;
-
-	FileMapping& operator=(const FileMapping& other) = delete;
-
-	size_t size() const {
-		return m_size;
-	}
-	const std::wstring& name() const {
-		return m_name;
-	}
-
-	void* begin() {
-		return m_buffer;
-	}
-	void* end() {
-		return static_cast<uint8_t*>(m_buffer) + m_size;
-	}
-
-	HANDLE handle() {
-		return m_hFileMap;
-	}
-
-	~FileMapping() {
-		free_members();
-	}
+public:
+	size_t size() const { return m_size; }
+	HANDLE handle() { return m_hFileMap.get(); }
+	void* begin() { return m_buffer.begin(); }
+	void* end() { return static_cast<uint8_t*>(m_buffer.begin()) + m_size; }
 };
+
+class UniqueFileMapping : public BaseFileMapping<size_t> {
+public:
+	UniqueFileMapping() {
+		m_hFileMap = create_file_mapping(m_size);
+		m_buffer = map_view_of_file(m_hFileMap.get(), m_size);
+	}
+
+	UniqueFileMapping(const UniqueFileMapping& other) = delete;
+	UniqueFileMapping& operator=(const UniqueFileMapping& other) = delete;
+};
+
+class UniqueInheritedFileMapping : public BaseFileMapping<size_t> {
+public:
+	UniqueInheritedFileMapping() {
+		m_hFileMap = create_inherited_file_mapping(m_size);
+		m_buffer = map_view_of_file(m_hFileMap.get(), m_size);
+	}
+
+	UniqueInheritedFileMapping(const UniqueInheritedFileMapping& other) = delete;
+	UniqueInheritedFileMapping& operator=(const UniqueInheritedFileMapping& other) = delete;
+}
 
 #endif // __FILE_MAPPING_HPP__
