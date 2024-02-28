@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 }
 ```
 
-```
+```cpp
 #include "file_mapping.hpp"
 
 int main(int argc, char* argv[]) {
