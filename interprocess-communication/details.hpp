@@ -6,9 +6,9 @@
 namespace details {
 	SECURITY_ATTRIBUTES security_attr(const bool inherit_handle) {
 		return SECURITY_ATTRIBUTES{
-			sizeof(SECURITY_ATTRIBUTES), // nLength
-			NULL,					     // lpSecurityDescriptor
-			inherit_handle			     // bInheritHandle
+			sizeof(SECURITY_ATTRIBUTES),	// nLength
+			NULL,					     	// lpSecurityDescriptor
+			inherit_handle			     	// bInheritHandle
 		};
 	}
 
