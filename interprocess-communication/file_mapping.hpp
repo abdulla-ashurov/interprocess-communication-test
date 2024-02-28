@@ -16,6 +16,9 @@ protected:
 
 public:
 	BaseFileMapping() {}
+	BaseFileMapping(HANDLE hFileMap) : m_hFileMap(hFileMap) {
+		m_buffer = map_view_of_file(m_hFileMap.get(), m_size);
+	}
 	virtual ~BaseFileMapping() = 0;
 
 public:
@@ -27,10 +30,11 @@ public:
 
 class UniqueFileMapping : public BaseFileMapping<size_t> {
 public:
-	UniqueFileMapping() {
+	UniqueFileMapping() : BaseFileMapping() {
 		m_hFileMap = create_file_mapping(m_size);
 		m_buffer = map_view_of_file(m_hFileMap.get(), m_size);
 	}
+	UniqueFileMapping(HANDLE hFileMap) : BaseFileMapping(hFileMap) {}
 
 	UniqueFileMapping(const UniqueFileMapping& other) = delete;
 	UniqueFileMapping& operator=(const UniqueFileMapping& other) = delete;
@@ -42,6 +46,7 @@ public:
 		m_hFileMap = create_inherited_file_mapping(m_size);
 		m_buffer = map_view_of_file(m_hFileMap.get(), m_size);
 	}
+	UniqueInheritedFileMapping(HANDLE hFileMap) : BaseFileMapping(hFileMap) {}
 
 	UniqueInheritedFileMapping(const UniqueInheritedFileMapping& other) = delete;
 	UniqueInheritedFileMapping& operator=(const UniqueInheritedFileMapping& other) = delete;

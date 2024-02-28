@@ -8,9 +8,11 @@ int main(int argc, char* argv[]) {
 
 	HANDLE hFileMap = (HANDLE)(std::stoi(argv[1]));
 	std::wcout << "hFileMap: " << hFileMap << std::endl;
-
-	FileMapping f_map(255, hFileMap, FILE_MODES::WRITE);
-	std::wcout << "Message from first process: " << (const wchar_t*)(f_map.begin());
+	
+	const size_t size = 12;
+	UniqueFileMapping f_map<size>(hFileMap);
+	
+	std::wcout << "Message from first process: " << (const char*)(f_map.begin());
 
 	return 0;
 }
