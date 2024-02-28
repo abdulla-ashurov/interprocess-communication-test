@@ -3,39 +3,43 @@
 
 #include <iostream>
 #include <string>
+
 #include "Windows.h"
+
 #include "common.hpp"
 
-// DRAFT
-
-class Process {
-private:
+class BaseProcess {
+protected:
 	PROCESS_INFORMATION m_pi;
 
 public:
-	Process(const std::wstring& cmd, const bool inherit_handles = false) : m_pi{ 0 } {
-		SECURITY_ATTRIBUTES sa = create_security_attr(inherit_handles);
-		
+	BaseProcess(const std::wstring& cmd) : m_pi{ NULL } {}
 
-		if (CreateProcess(NULL, const_cast<LPWSTR>(cmd.c_str()), &sa, &sa, inherit_handles, NULL, NULL, NULL, &si, &m_pi) == NULL) {
-			std::wcout << "It cannot create a new process" << std::endl;
-			return;
-		}
-
-		WaitForSingleObject(m_pi.hProcess, INFINITE);
+	~BaseProcess() {
+		details::checked_close_handle(m_pi.hProcess);
+		details::checked_close_handle(m_pi.hThread);
 	}
 
-	Process(const Process& other) = delete;
-	Process& operator=(const Process& other) = delete;
+public:
+	BaseProcess(const BaseProcess& other) = delete;
+	BaseProcess& operator=(const BaseProcess& other) = delete;
 
-	~Process() {
-		if (m_pi.hProcess) {
-			CloseHandle(m_pi.hProcess);
-		}
+public:
+	void detach() {}
+	void join() { WaitForSingleObject(m_pi.hProcess, INFINITE); }
+};
 
-		if (m_pi.hThread) {
-			CloseHandle(m_pi.hThread);
-		}
+class Process : public BaseProcess {
+public:
+	Process(const std::wstring& cmd) {
+		create_process(cmd, m_pi);
+	}
+};
+
+class InheritedProcess : public BaseProcess {
+public:
+	InheritedProcess(const std::wstring& cmd) {
+		create_inherited_process(cmd, m_pi);
 	}
 };
 
