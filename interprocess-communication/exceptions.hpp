@@ -7,7 +7,7 @@
 
 #include "common.hpp"
 
-class FileMappingExceptions : public std::exceptions {
+class BaseWinApiExceptions : public std::exceptions {
 private:
 	int m_err_code;
 public:

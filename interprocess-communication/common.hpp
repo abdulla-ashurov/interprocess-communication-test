@@ -10,7 +10,7 @@ SECURITY_ATTRIBUTES create_security_attr(const bool inherit_handle = false) {
 HANDLE create_file_mapping(const size_t size) {
 	HANDLE hFileMap = details::create_file_mapping(size);
 	if (hFileMap == NULL) {
-		throw FileMappingExceptions(GetLastError());
+		throw BaseWinApiExceptions(GetLastError());
 	}
 
 	return hFileMap;
@@ -19,7 +19,7 @@ HANDLE create_file_mapping(const size_t size) {
 HANDLE create_inherited_file_mapping(const size_t size) {
 	HANDLE hFileMap = details::create_inherited_file_mapping(size);
 	if (hFileMap == NULL) {
-		throw FileMappingExceptions(GetLastError());
+		throw BaseWinApiExceptions(GetLastError());
 	}
 
 	return hFileMap;
@@ -28,7 +28,7 @@ HANDLE create_inherited_file_mapping(const size_t size) {
 void* map_view_of_file(HANDLE f_map, const size_t size) {
 	void* buffer = details::map_view_of_file(f_map, size);
 	if (buffer == NULL) {
-		throw FileMappingExceptions(GetLastError());
+		throw BaseWinApiExceptions(GetLastError());
 	}
 
 	return buffer;
@@ -36,13 +36,13 @@ void* map_view_of_file(HANDLE f_map, const size_t size) {
 
 void create_process(const std::wstring &cmd, PROCESS_INFORMATION &pi) {
 	if (!details::create_process(cmd, pi)) {
-		// Add exception
+		throw BaseWinApiExceptions(GetLastError());
 	}
 }
 
 void create_inherited_process(const std::wstring& cmd, PROCESS_INFORMATION& pi) {
 	if (!details::create_inherited_process(cmd, pi)) {
-		// Add exception
+		throw BaseWinApiExceptions(GetLastError());
 	}
 }
 

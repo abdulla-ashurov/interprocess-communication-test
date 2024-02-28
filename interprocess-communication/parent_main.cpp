@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
 		Process process(cmd);
 		process.join();
 	}
-	catch (FileMappingExceptions e) {
+	catch (BaseWinApiExceptions e) {
 		std::cout << "Error: " << e.msg();
 	}
 

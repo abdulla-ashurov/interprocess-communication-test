@@ -60,7 +60,7 @@ namespace details {
 		);
 	}
 
-	bool create_inherited_process(PROCESS_INFORMATION &pi) {
+	bool create_inherited_process(const std::wstring& cmd, PROCESS_INFORMATION &pi) {
 		STARTUPINFO si = { sizeof(si) };
 		SECURITY_ATTRIBUTES sa = create_security_attr(true);
 		return CreateProcess(
