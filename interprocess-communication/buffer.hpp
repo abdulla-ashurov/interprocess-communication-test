@@ -12,7 +12,7 @@ private:
 public:
 	UniqueMapViewBuffer() : m_buffer(NULL) {}
 	UniqueMapViewBuffer(void* buffer) : m_buffer(buffer) {}
-	
+
 	~UniqueMapViewBuffer() {
 		details::checked_unmap_view_of_file(m_buffer);
 	}

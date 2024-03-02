@@ -26,7 +26,7 @@ namespace details {
 	HANDLE create_inherited_file_mapping(const size_t size) {
 		return CreateFileMapping(
 			INVALID_HANDLE_VALUE,		// hFile
-			create_security_attr(true),	// lpFileMappingAttributes
+			security_attr(true),		// lpFileMappingAttributes
 			PAGE_READWRITE,				// flProtect
 			0,							// dwMaximumSizeHigh
 			size,						// dwMaximumSizeHigh
@@ -44,7 +44,7 @@ namespace details {
 		);
 	}
 
-	bool create_process(const std::wstring &cmd, PROCESS_INFORMATION &pi) {
+	bool create_process(const std::wstring& cmd, PROCESS_INFORMATION& pi) {
 		STARTUPINFO si;
 		return CreateProcess(
 			NULL,								// lpApplicationName
@@ -60,7 +60,7 @@ namespace details {
 		);
 	}
 
-	bool create_inherited_process(const std::wstring& cmd, PROCESS_INFORMATION &pi) {
+	bool create_inherited_process(const std::wstring& cmd, PROCESS_INFORMATION& pi) {
 		STARTUPINFO si = { sizeof(si) };
 		SECURITY_ATTRIBUTES sa = create_security_attr(true);
 		return CreateProcess(
@@ -77,7 +77,7 @@ namespace details {
 		);
 	}
 
-	int format_message(const int err_code, char *errMsg) {
+	int format_message(const int err_code, char* errMsg) {
 		return FormatMessage(
 			FORMAT_MESSAGE_ALLOCATE_BUFFER |
 			FORMAT_MESSAGE_FROM_SYSTEM |
@@ -92,7 +92,7 @@ namespace details {
 	}
 
 	// Free the buffer allocated by format_message
-	void local_free(char *buffer) {
+	void local_free(char* buffer) {
 		if (buffer) {
 			LocalFree(buffer);
 		}
@@ -104,9 +104,9 @@ namespace details {
 		}
 	}
 
-	void checked_unmap_view_of_file(void *buffer) {
+	void checked_unmap_view_of_file(void* buffer) {
 		if (buffer) {
-			UnmapViewOfFile(m_buffer);
+			UnmapViewOfFile(buffer);
 		}
 	}
 }

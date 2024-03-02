@@ -34,7 +34,7 @@ void* map_view_of_file(HANDLE f_map, const size_t size) {
 	return buffer;
 }
 
-void create_process(const std::wstring &cmd, PROCESS_INFORMATION &pi) {
+void create_process(const std::wstring& cmd, PROCESS_INFORMATION& pi) {
 	if (!details::create_process(cmd, pi)) {
 		throw BaseWinApiExceptions(GetLastError());
 	}
@@ -58,3 +58,4 @@ std::string error_message(const size_t err_code) {
 }
 
 #endif // __COMMON_HPP__
+	
